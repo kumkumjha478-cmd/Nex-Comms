@@ -3,130 +3,160 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="theme-color" content="#030703" />
-  <link rel="manifest" href="manifest.json" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#1e2227" />
   <title>Nex-Comms // By PriX_J3</title>
   
-  <!-- PeerJS CDN -->
+  <!-- PeerJS Client CDN -->
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 
   <style>
     :root {
-      --bg: #030703;
-      --card-bg: #071207;
-      --green: #00ff66;
-      --green-dim: #008833;
-      --green-glow: rgba(0, 255, 102, 0.25);
-      --amber: #ffaa00;
-      --red: #ff3322;
-      --font: 'SF Mono', Monaco, 'Courier New', Courier, monospace;
+      --bg: #1c2024;
+      --panel: #262c33;
+      --card-bg: #2e353d;
+      --border: #3d4652;
+      --text: #f0f3f6;
+      --text-dim: #9aa4b2;
+      --cyan: #38bdf8;
+      --green: #4ade80;
+      --amber: #fbbf24;
+      --red: #f87171;
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font); -webkit-tap-highlight-color: transparent; }
-    body { background: var(--bg); color: var(--green); height: 100vh; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+    body { background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-    body::before {
-      content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.4) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
-      background-size: 100% 3px, 4px 100%; pointer-events: none; z-index: 99;
-    }
-
+    /* Header */
     header {
-      padding: 12px 16px; border-bottom: 1px solid var(--green-dim); display: flex; justify-content: space-between; align-items: center;
-      background: #020502; box-shadow: 0 2px 10px rgba(0,0,0,0.8); z-index: 10;
+      background: var(--panel); border-bottom: 2px solid var(--border); padding: 12px 16px;
+      display: flex; justify-content: space-between; align-items: center; z-index: 10;
     }
-    .brand-title { font-size: 15px; font-weight: 900; letter-spacing: 1.5px; text-shadow: 0 0 6px var(--green); }
-    .status-badge { font-size: 11px; padding: 3px 8px; border: 1px solid var(--green-dim); border-radius: 2px; }
+    .brand { font-size: 16px; font-weight: 800; letter-spacing: 1px; color: var(--cyan); }
+    .badge { font-size: 11px; padding: 4px 8px; border-radius: 4px; background: #13171a; border: 1px solid var(--border); }
+    .badge.online { color: var(--green); border-color: var(--green); }
+    .badge.master { color: var(--amber); border-color: var(--amber); }
 
-    .view-container { flex: 1; display: none; flex-direction: column; padding: 14px; overflow-y: auto; }
-    .view-container.active { display: flex; }
+    /* Views */
+    .view { flex: 1; display: none; flex-direction: column; padding: 14px; overflow-y: auto; }
+    .view.active { display: flex; }
 
-    .card { background: var(--card-bg); border: 1px solid var(--green-dim); border-radius: 4px; padding: 16px; margin-bottom: 14px; box-shadow: 0 0 10px var(--green-glow); }
-    .card-title { font-size: 13px; font-weight: bold; margin-bottom: 8px; letter-spacing: 1px; color: var(--green); }
-    
-    label { font-size: 11px; color: var(--green-dim); display: block; margin-bottom: 6px; text-transform: uppercase; }
-    input { width: 100%; background: #000; border: 1px solid var(--green-dim); color: var(--green); padding: 11px; font-size: 13px; margin-bottom: 12px; border-radius: 2px; }
-    input:focus { outline: none; border-color: var(--green); box-shadow: 0 0 8px var(--green-glow); }
+    /* Modular Cards */
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 12px; }
+    .card-title { font-size: 13px; font-weight: 700; margin-bottom: 8px; color: var(--cyan); letter-spacing: 0.5px; }
 
-    .btn { background: #011d0a; border: 1px solid var(--green); color: var(--green); padding: 11px 16px; font-size: 13px; font-weight: bold; cursor: pointer; text-align: center; border-radius: 2px; letter-spacing: 1px; }
-    .btn:active { background: var(--green); color: #000; }
+    /* Inputs */
+    label { font-size: 11px; font-weight: 600; color: var(--text-dim); display: block; margin-bottom: 6px; }
+    input {
+      width: 100%; background: #181b1f; border: 1px solid var(--border); color: #fff;
+      padding: 12px; font-size: 14px; margin-bottom: 12px; border-radius: 6px;
+    }
+    input:focus { outline: none; border-color: var(--cyan); }
+
+    /* Buttons */
+    .btn {
+      background: #333c46; border: 1px solid var(--border); color: #fff;
+      padding: 12px 16px; font-size: 13px; font-weight: 700; cursor: pointer; text-align: center; border-radius: 6px;
+    }
+    .btn:active { opacity: 0.8; transform: translateY(1px); }
+    .btn-blue { background: #0284c7; border-color: #38bdf8; color: #fff; }
+    .btn-green { background: #15803d; border-color: #4ade80; color: #fff; }
+    .btn-amber { background: #b45309; border-color: #fbbf24; color: #fff; }
+    .btn-red { background: #b91c1c; border-color: #f87171; color: #fff; }
     .btn-full { width: 100%; }
-    .btn-amber { border-color: var(--amber); color: var(--amber); background: #1f1401; }
-    .btn-red { border-color: var(--red); color: var(--red); background: #260505; }
 
-    .list-item { background: #020902; border: 1px solid #063314; padding: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border-radius: 2px; }
-    .list-item:active { background: #09260f; }
+    /* Items */
+    .item {
+      background: var(--panel); border: 1px solid var(--border); padding: 12px;
+      margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border-radius: 6px; cursor: pointer;
+    }
 
-    .terminal-box { flex: 1; background: #010401; border: 1px solid var(--green-dim); padding: 10px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; font-size: 12px; border-radius: 2px; }
-    .msg-line { padding: 4px 6px; border-left: 2px solid var(--green); line-height: 1.4; word-break: break-all; }
-    .msg-line.sys { border-left-color: var(--amber); color: var(--amber); font-size: 11px; }
-    .msg-line.peer { border-left-color: #00ccff; color: #aae8ff; }
+    /* Terminal Message Box */
+    .feed-box {
+      flex: 1; background: #15181b; border: 1px solid var(--border); padding: 12px;
+      overflow-y: auto; display: flex; flex-direction: column; gap: 8px; font-size: 13px; border-radius: 6px;
+    }
+    .msg-row { padding: 4px 6px; line-height: 1.4; word-break: break-all; }
+    .msg-row.sys { color: var(--amber); font-size: 11px; }
+    .msg-row.peer { color: var(--cyan); }
+    .msg-row.me { color: var(--green); }
 
-    .ptt-btn { height: 62px; font-size: 15px; letter-spacing: 2px; background: #00220c; border: 2px solid var(--green); color: var(--green); text-align: center; font-weight: 900; }
-    .ptt-btn.broadcasting { background: var(--red); border-color: #ff8877; color: #fff; box-shadow: 0 0 20px var(--red); }
+    /* Big PTT Button */
+    .ptt-btn {
+      height: 64px; font-size: 16px; font-weight: 800; letter-spacing: 1px;
+      background: #1e3a5f; border: 2px solid var(--cyan); color: #fff; border-radius: 8px;
+    }
+    .ptt-btn.active-tx { background: #991b1b; border-color: #f87171; color: #fff; }
 
-    footer { padding: 8px; text-align: center; font-size: 10px; color: var(--green-dim); border-top: 1px solid #003311; letter-spacing: 1.5px; }
+    /* Footer Branding */
+    footer {
+      background: var(--panel); padding: 8px; text-align: center; font-size: 11px;
+      color: var(--text-dim); border-top: 1px solid var(--border);
+    }
   </style>
 </head>
 <body>
 
+  <!-- Top Header -->
   <header>
     <div>
-      <span class="brand-title">NEX-COMMS</span>
-      <span style="font-size: 10px; color: var(--green-dim); margin-left: 6px;">[P2P-LIVE]</span>
+      <span class="brand">NEX-COMMS</span>
     </div>
-    <div class="status-badge" id="hud-status">INIT...</div>
+    <div class="badge" id="hud-badge">STANDBY</div>
   </header>
 
-  <!-- 1. LOGIN / IDENTITY -->
-  <div id="view-auth" class="view-container">
+  <!-- 1. AUTH / REGISTER VIEW -->
+  <div id="view-auth" class="view active">
     <div class="card">
-      <div class="card-title">// TERMINAL ACCESS AUTH</div>
-      <label>CALLSIGN / NICKNAME:</label>
+      <div class="card-title">USER INITIALIZATION</div>
+      <p style="font-size: 12px; color: var(--text-dim); margin-bottom: 14px;">Set your nickname or enter existing key to login.</p>
+      
+      <label>YOUR NAME / CALLSIGN:</label>
       <input type="text" id="auth-name" placeholder="e.g. Priyansh" />
 
-      <label>FREQUENCY KEY (Restore or Master Key):</label>
-      <input type="password" id="auth-key" placeholder="Leave empty if first time" />
+      <label>ACCESS KEY (Leave empty if new):</label>
+      <input type="password" id="auth-key" placeholder="Paste saved Key / Master Key" />
 
-      <button class="btn btn-full" onclick="handleAuth()">INITIALIZE NODE</button>
+      <button class="btn btn-blue btn-full" onclick="handleAuth()">LOGIN / GENERATE KEY</button>
     </div>
   </div>
 
-  <!-- 2. CONTACTS HUB -->
-  <div id="view-hub" class="view-container">
-    <div class="card" style="margin-bottom: 10px; padding: 10px;">
-      <div style="display: flex; justify-content: space-between; font-size: 11px;">
-        <span>CALLSIGN: <strong id="hub-callsign" style="color:#fff;">--</strong></span>
-        <span>PEER KEY: <strong id="hub-key" style="color:var(--amber);">--</strong></span>
+  <!-- 2. HUB (CONTACTS & CHANNELS) -->
+  <div id="view-hub" class="view">
+    <div class="card" style="padding: 10px; margin-bottom: 10px;">
+      <div style="display: flex; justify-content: space-between; font-size: 12px;">
+        <span>NAME: <strong id="hub-name" style="color:var(--green);">--</strong></span>
+        <span>MY KEY: <strong id="hub-key" style="color:var(--cyan);">--</strong></span>
       </div>
     </div>
 
     <div style="display: flex; gap: 8px; margin-bottom: 10px;">
-      <button class="btn btn-full" style="padding: 8px; font-size: 11px;" onclick="promptAddContact()">+ LINK FRIEND KEY</button>
+      <button class="btn btn-blue btn-full" style="padding: 8px; font-size: 12px;" onclick="addContact()">+ LINK FRIEND</button>
+      <button class="btn btn-amber btn-full" style="padding: 8px; font-size: 12px;" onclick="addChannel()">+ NEW CHANNEL</button>
     </div>
 
-    <div style="font-size: 11px; color: var(--green-dim); margin: 6px 0;">SAVED FREQUENCIES:</div>
-    <div id="contacts-list" style="flex: 1; overflow-y: auto;"></div>
+    <div style="font-size: 11px; color: var(--text-dim); margin: 6px 0;">CHANNELS & SAVED LINKS:</div>
+    <div id="list-container" style="flex: 1; overflow-y: auto;"></div>
 
-    <button class="btn btn-red" style="margin-top: 8px; padding: 6px; font-size: 11px;" onclick="logout()">LOGOUT / WIPE SESSION</button>
+    <button class="btn btn-red" style="margin-top: 8px; padding: 6px; font-size: 11px;" onclick="logout()">LOGOUT</button>
   </div>
 
-  <!-- 3. ACTIVE LIVE COMMS -->
-  <div id="view-comms" class="view-container">
+  <!-- 3. COMMS SCREEN (CHAT & PTT) -->
+  <div id="view-comms" class="view">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
       <button class="btn" style="padding: 4px 10px; font-size: 11px;" onclick="switchView('hub')">&lt; HUB</button>
-      <span id="active-target-title" style="font-weight: bold; font-size: 13px;">NODE: --</span>
-      <button class="btn btn-amber" style="padding: 4px 10px; font-size: 11px;" onclick="initiate3Ping()">3-PING</button>
+      <strong id="comms-title" style="color:var(--cyan); font-size: 13px;">NODE: --</strong>
+      <button class="btn btn-amber" style="padding: 4px 10px; font-size: 11px;" onclick="send3Ping()">3-PING</button>
     </div>
 
-    <div class="terminal-box" id="comms-feed">
-      <div class="msg-line sys">[SYSTEM] Connecting to remote peer signal...</div>
+    <div class="feed-box" id="comms-feed">
+      <div class="msg-row sys">[READY] Tactical pipe initialized.</div>
     </div>
 
     <div style="display: flex; gap: 6px; margin: 8px 0;">
-      <input type="text" id="chat-input" placeholder="Type tactical message..." style="margin-bottom: 0;" />
-      <button class="btn" onclick="sendChatMessage()">SEND</button>
+      <input type="text" id="chat-msg" placeholder="Write message..." style="margin-bottom: 0;" />
+      <button class="btn btn-blue" onclick="sendMsg()">SEND</button>
     </div>
 
     <button class="btn ptt-btn" id="ptt-btn" onmousedown="startPTT()" onmouseup="stopPTT()" ontouchstart="startPTT()" ontouchend="stopPTT()">
@@ -134,50 +164,53 @@
     </button>
   </div>
 
-  <!-- 4. MASTER SURVEILLANCE CONSOLE -->
-  <div id="view-master" class="view-container">
-    <div class="card" style="border-color: var(--amber); background: #120a01;">
-      <div class="card-title" style="color: var(--amber);">[PRIY_MASTER GOD-MODE SURVEILLANCE]</div>
-      <p style="font-size: 11px; color: #ffcc66;">Master key authenticated. Monitoring all active network packets.</p>
+  <!-- 4. MASTER OVERSEER / ADMIN -->
+  <div id="view-master" class="view">
+    <div class="card" style="border-color: var(--amber);">
+      <div class="card-title" style="color: var(--amber);">MASTER SURVEILLANCE OVERVIEW</div>
+      <p style="font-size: 12px; color: var(--text-dim);">Global root key recognized. Node: PriX_J3</p>
     </div>
 
     <div class="card">
-      <div class="card-title">// INTERCEPTED TRAFFIC FEED</div>
-      <div id="master-intercepts" style="font-size: 11px; color: #aaa; max-height: 200px; overflow-y: auto;">
-        No active packets detected yet.
+      <div class="card-title">NETWORK INTERCEPT LOGS</div>
+      <div id="master-feed" style="font-size: 12px; max-height: 180px; overflow-y: auto; color: var(--text-dim);">
+        Awaiting live signal traffic...
       </div>
     </div>
 
     <div class="card">
-      <button class="btn btn-full" onclick="switchView('hub')">RETURN TO HUB</button>
+      <button class="btn btn-red btn-full" onclick="purgeAll()">PURGE ALL STORAGE</button>
+      <button class="btn btn-full" style="margin-top: 8px;" onclick="switchView('hub')">EXIT TO HUB</button>
     </div>
   </div>
 
+  <!-- Footer Branding -->
   <footer>
     NEX-COMMS // OPERATIONAL ARCHITECTURE BY PRIX_J3
   </footer>
 
   <script>
     const MASTER_KEY = "eternityisgreatbyprixj3";
-    const PEER_PREFIX = "nexcomms-";
 
-    let currentUser = JSON.parse(localStorage.getItem('nex_user')) || null;
+    // Safe State Load
+    let currentUser = null;
+    try {
+      currentUser = JSON.parse(localStorage.getItem('nex_user'));
+    } catch(e) { currentUser = null; }
+
     let contacts = JSON.parse(localStorage.getItem('nex_contacts')) || [];
-    let activePeerKey = null;
-
-    // WebRTC & Audio Context
-    let peerInstance = null;
+    let channels = JSON.parse(localStorage.getItem('nex_channels')) || ["GEN-433"];
+    let activeSession = null;
+    let peer = null;
     let activeConnection = null;
-    let localStream = null;
-    let incomingCall = null;
 
+    // Web Audio Synthesizer
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-    function playTone(freq, type = 'sine', duration = 0.12) {
+    function playBeep(freq = 1000, duration = 0.12) {
       if (audioCtx.state === 'suspended') audioCtx.resume();
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
-      osc.type = type;
+      osc.type = 'sine';
       osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
       gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
@@ -187,226 +220,227 @@
       osc.stop(audioCtx.currentTime + duration);
     }
 
-    function generateKey() {
-      const chars = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
-      let part = "";
-      for (let i = 0; i < 4; i++) part += chars.charAt(Math.floor(Math.random() * chars.length));
-      return "DEL-" + part;
+    function playSquelch() {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(180, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.08);
     }
 
-    function switchView(viewName) {
-      document.querySelectorAll('.view-container').forEach(v => v.classList.remove('active'));
-      document.getElementById('view-' + viewName).classList.add('active');
+    function generateKey() {
+      const chars = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
+      let res = "";
+      for (let i = 0; i < 4; i++) res += chars.charAt(Math.floor(Math.random() * chars.length));
+      return "del-" + res.toLowerCase();
+    }
+
+    function switchView(name) {
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      const target = document.getElementById('view-' + name);
+      if (target) target.classList.add('active');
     }
 
     function handleAuth() {
-      const nameInput = document.getElementById('auth-name').value.trim();
-      const keyInput = document.getElementById('auth-key').value.trim();
+      const name = document.getElementById('auth-name').value.trim();
+      const key = document.getElementById('auth-key').value.trim();
 
-      if (keyInput === MASTER_KEY) {
-        currentUser = { name: nameInput || "COMMANDER", key: MASTER_KEY, isMaster: true };
-        localStorage.setItem('nex_user', JSON.stringify(currentUser));
-        initPeerEngine();
-        switchView('master');
-        return;
-      }
-
-      if (keyInput && keyInput.startsWith("DEL-")) {
-        currentUser = { name: nameInput || "AGENT", key: keyInput, isMaster: false };
+      if (key === MASTER_KEY) {
+        currentUser = { name: name || "PRIYANSH (HOST)", peerId: "nex-master-prixj3", isMaster: true };
+      } else if (key && key.startsWith("del-")) {
+        currentUser = { name: name || "AGENT", peerId: key.toLowerCase(), isMaster: false };
       } else {
-        if (!nameInput) return alert("Call-Sign name is required!");
-        currentUser = { name: nameInput, key: generateKey(), isMaster: false };
+        if (!name) return alert("Please enter your name!");
+        currentUser = { name: name, peerId: generateKey(), isMaster: false };
       }
 
       localStorage.setItem('nex_user', JSON.stringify(currentUser));
-      initPeerEngine();
+      boot();
     }
 
-    function bootApp() {
-      if (!currentUser) {
+    function boot() {
+      if (!currentUser || !currentUser.peerId) {
         switchView('auth');
+        return;
+      }
+
+      document.getElementById('hub-name').innerText = currentUser.name.toUpperCase();
+      document.getElementById('hub-key').innerText = currentUser.peerId;
+      renderHub();
+      initPeer();
+
+      if (currentUser.isMaster) {
+        document.getElementById('hud-badge').innerText = "HOST / GOD-MODE";
+        document.getElementById('hud-badge').className = "badge master";
+        switchView('master');
       } else {
-        initPeerEngine();
+        document.getElementById('hud-badge').innerText = "ONLINE";
+        document.getElementById('hud-badge').className = "badge online";
+        switchView('hub');
       }
     }
 
-    // --- PeerJS Signaling & P2P Tunnel Engine ---
-    function initPeerEngine() {
-      document.getElementById('hub-callsign').innerText = currentUser.name.toUpperCase();
-      document.getElementById('hub-key').innerText = currentUser.key;
+    function initPeer() {
+      if (peer) peer.destroy();
+      peer = new Peer(currentUser.peerId);
 
-      const peerId = PEER_PREFIX + currentUser.key.toLowerCase();
-      peerInstance = new Peer(peerId, { debug: 1 });
+      peer.on('open', (id) => {
+        document.getElementById('hub-key').innerText = id;
+      });
 
-      peerInstance.on('open', (id) => {
-        document.getElementById('hud-status').innerText = "ONLINE";
-        renderHub();
-        if (currentUser.isMaster) {
-          switchView('master');
-        } else {
-          switchView('hub');
+      peer.on('connection', (conn) => {
+        setupConn(conn);
+      });
+    }
+
+    function setupConn(conn) {
+      activeConnection = conn;
+      conn.on('open', () => {
+        appendLog(`[LINK OPEN] Connected to ${conn.peer}`, 'sys');
+      });
+
+      conn.on('data', (data) => {
+        if (typeof data === 'object') {
+          if (data.type === '3PING') {
+            playSquelch();
+            appendLog(`>> 3-PING FROM ${data.sender}`, 'sys');
+            if (data.count === 3) playBeep(1200, 0.2);
+          } else if (data.type === 'CHAT') {
+            playSquelch();
+            appendLog(`${data.sender}: ${data.text}`, 'peer');
+          } else if (data.type === 'PTT_ON') {
+            playSquelch();
+            appendLog(`● ${data.sender} IS TRANSMITTING...`, 'sys');
+          } else if (data.type === 'PTT_OFF') {
+            playBeep(1000, 0.15);
+            appendLog(`■ ${data.sender} RELEASED PTT`, 'sys');
+          }
         }
       });
-
-      peerInstance.on('connection', (conn) => {
-        setupDataConnection(conn);
-      });
-
-      peerInstance.on('call', (call) => {
-        // Auto-answer incoming radio stream
-        navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-          localStream = stream;
-          call.answer(stream);
-          call.on('stream', remoteStream => {
-            const audio = new Audio();
-            audio.srcObject = remoteStream;
-            audio.play();
-          });
-        });
-      });
-
-      peerInstance.on('error', (err) => {
-        console.error('Peer error:', err);
-        document.getElementById('hud-status').innerText = "ERR";
-      });
     }
 
-    function setupDataConnection(conn) {
-      activeConnection = conn;
+    function openComms(targetId, isChannel) {
+      activeSession = { target: targetId, isChannel };
+      document.getElementById('comms-title').innerText = isChannel ? "# " + targetId : "NODE: " + targetId;
+      switchView('comms');
 
-      conn.on('open', () => {
-        appendCommsLog(`[P2P LINKED] Connected to ${conn.peer.replace(PEER_PREFIX, '').toUpperCase()}`, 'sys');
-      });
-
-      conn.on('data', (payload) => {
-        handleIncomingPacket(payload);
-      });
-
-      conn.on('close', () => {
-        appendCommsLog('[P2P LOST] Remote peer disconnected.', 'sys');
-      });
-    }
-
-    function handleIncomingPacket(packet) {
-      if (currentUser.isMaster) {
-        const box = document.getElementById('master-intercepts');
-        box.innerHTML += `<div>[${new Date().toLocaleTimeString()}] ${JSON.stringify(packet)}</div>`;
-      }
-
-      if (packet.type === 'PING') {
-        playTone(300, 'sawtooth', 0.08);
-        appendCommsLog(`>> INCOMING PING ${packet.index}/3 from <${packet.sender}>`, 'sys');
-      } else if (packet.type === 'CHAT') {
-        playTone(900, 'sine', 0.08);
-        appendCommsLog(`<strong><${packet.sender}>:</strong> ${packet.message}`, 'peer');
+      if (!isChannel && peer) {
+        appendLog(`Connecting to ${targetId}...`, 'sys');
+        const conn = peer.connect(targetId);
+        setupConn(conn);
       }
     }
 
-    function appendCommsLog(html, className = '') {
+    function appendLog(txt, type = 'me') {
       const feed = document.getElementById('comms-feed');
-      feed.innerHTML += `<div class="msg-line ${className}">${html}</div>`;
+      const div = document.createElement('div');
+      div.className = `msg-row ${type}`;
+      div.innerText = txt;
+      feed.appendChild(div);
       feed.scrollTop = feed.scrollHeight;
     }
 
-    // --- Comms Actions ---
-    function openComms(contactKey, contactName) {
-      activePeerKey = contactKey;
-      document.getElementById('active-target-title').innerText = "NODE: " + contactName;
-      switchView('comms');
-
-      const targetPeerId = PEER_PREFIX + contactKey.toLowerCase();
-      const conn = peerInstance.connect(targetPeerId);
-      setupDataConnection(conn);
-    }
-
-    function sendChatMessage() {
-      const input = document.getElementById('chat-input');
-      const text = input.value.trim();
-      if (!text || !activeConnection || !activeConnection.open) return;
-
-      const packet = { type: 'CHAT', sender: currentUser.name, message: text };
-      activeConnection.send(packet);
-
-      appendCommsLog(`<strong><${currentUser.name}>:</strong> ${text}`);
-      input.value = "";
-    }
-
-    function initiate3Ping() {
-      if (!activeConnection || !activeConnection.open) {
-        return alert("Peer not yet linked. Waiting for signal...");
-      }
-
-      appendCommsLog(`[3-PING PROTOCOL] Firing pulses...`, 'sys');
-      let count = 0;
-      const interval = setInterval(() => {
-        count++;
-        playTone(180, 'sawtooth', 0.08);
-        activeConnection.send({ type: 'PING', sender: currentUser.name, index: count });
-        appendCommsLog(`&gt;&gt; TRANSMITTED PING ${count}/3`, 'sys');
-
-        if (count >= 3) {
-          clearInterval(interval);
-          playTone(1200, 'sine', 0.15);
+    function send3Ping() {
+      if (!activeConnection || !activeConnection.open) return appendLog("[ERROR] Peer link not ready.", 'sys');
+      appendLog("Initiating 3-Ping...", 'sys');
+      let c = 0;
+      const t = setInterval(() => {
+        c++;
+        playSquelch();
+        activeConnection.send({ type: '3PING', count: c, sender: currentUser.name });
+        appendLog(`>> Ping ${c}/3 delivered`, 'sys');
+        if (c >= 3) {
+          clearInterval(t);
+          playBeep(1200, 0.2);
         }
       }, 500);
     }
 
-    // --- PTT Audio ---
-    let mediaRecorder = null;
-    function startPTT() {
-      playTone(180, 'sawtooth', 0.08);
-      const btn = document.getElementById('ptt-btn');
-      btn.classList.add('broadcasting');
-      btn.innerText = "● LIVE ON-AIR...";
+    function sendMsg() {
+      const input = document.getElementById('chat-msg');
+      const val = input.value.trim();
+      if (!val) return;
 
-      if (!activePeerKey) return;
-      const targetPeerId = PEER_PREFIX + activePeerKey.toLowerCase();
-
-      navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-        localStream = stream;
-        peerInstance.call(targetPeerId, stream);
-      }).catch(err => console.log('Mic denied or unavailable.'));
+      appendLog(`Me: ${val}`, 'me');
+      if (activeConnection && activeConnection.open) {
+        activeConnection.send({ type: 'CHAT', text: val, sender: currentUser.name });
+      }
+      input.value = "";
     }
 
-    function stopPTT() {
-      playTone(1000, 'sine', 0.15); // Roger beep
+    let isPttActive = false;
+    function startPTT() {
+      if (isPttActive) return;
+      isPttActive = true;
+      playSquelch();
       const btn = document.getElementById('ptt-btn');
-      btn.classList.remove('broadcasting');
-      btn.innerText = "HOLD TO TRANSMIT (PTT)";
-
-      if (localStream) {
-        localStream.getTracks().forEach(t => t.stop());
-        localStream = null;
+      btn.classList.add('active-tx');
+      btn.innerText = "● TRANSMITTING LIVE...";
+      if (activeConnection && activeConnection.open) {
+        activeConnection.send({ type: 'PTT_ON', sender: currentUser.name });
       }
     }
 
-    // --- Hub Navigation ---
-    function promptAddContact() {
-      const fKey = prompt("Enter Friend's Unpredictable Key (e.g. DEL-9X4K):");
-      if (!fKey) return;
-      const nick = prompt("Assign Tactical Nickname:");
-      if (!nick) return;
+    function stopPTT() {
+      if (!isPttActive) return;
+      isPttActive = false;
+      playBeep(1000, 0.15);
+      const btn = document.getElementById('ptt-btn');
+      btn.classList.remove('active-tx');
+      btn.innerText = "HOLD TO TRANSMIT (PTT)";
+      if (activeConnection && activeConnection.open) {
+        activeConnection.send({ type: 'PTT_OFF', sender: currentUser.name });
+      }
+    }
 
-      contacts.push({ key: fKey.toUpperCase().trim(), name: nick });
+    function addContact() {
+      const k = prompt("Enter Friend's Key (e.g. del-9x4k):");
+      if (!k) return;
+      const n = prompt("Enter Nickname:");
+      if (!n) return;
+      contacts.push({ key: k.toLowerCase().trim(), name: n });
       localStorage.setItem('nex_contacts', JSON.stringify(contacts));
       renderHub();
     }
 
+    function addChannel() {
+      const c = prompt("Enter Channel Name (e.g. SQUAD):");
+      if (!c) return;
+      channels.push(c.toUpperCase().trim());
+      localStorage.setItem('nex_channels', JSON.stringify(channels));
+      renderHub();
+    }
+
     function renderHub() {
-      const list = document.getElementById('contacts-list');
-      list.innerHTML = "";
-      if (contacts.length === 0) {
-        list.innerHTML = `<div style="font-size:11px; color:var(--green-dim); padding:10px;">NO FREQUENCIES LINKED. CLICK + LINK FRIEND KEY.</div>`;
-        return;
-      }
-      contacts.forEach(c => {
-        list.innerHTML += `
-          <div class="list-item" onclick="openComms('${c.key}', '${c.name}')">
+      const box = document.getElementById('list-container');
+      box.innerHTML = "";
+
+      channels.forEach(ch => {
+        box.innerHTML += `
+          <div class="item" onclick="openComms('${ch}', true)">
             <div>
-              <strong>${c.name}</strong><br/>
-              <span style="font-size:10px; color:var(--green-dim);">${c.key}</span>
+              <strong style="color:var(--amber);"># ${ch}</strong><br/>
+              <span style="font-size:11px; color:var(--text-dim);">Squad Channel</span>
             </div>
-            <span style="font-size:11px; color:var(--green);">[CONNECT]</span>
+            <span style="font-size:11px; color:var(--amber);">[ENTER]</span>
+          </div>
+        `;
+      });
+
+      contacts.forEach(c => {
+        box.innerHTML += `
+          <div class="item" onclick="openComms('${c.key}', false)">
+            <div>
+              <strong style="color:var(--cyan);">${c.name}</strong><br/>
+              <span style="font-size:11px; color:var(--text-dim);">${c.key}</span>
+            </div>
+            <span style="font-size:11px; color:var(--green);">[LINK]</span>
           </div>
         `;
       });
@@ -415,10 +449,18 @@
     function logout() {
       localStorage.removeItem('nex_user');
       currentUser = null;
+      if (peer) peer.destroy();
       location.reload();
     }
 
-    window.onload = bootApp;
+    function purgeAll() {
+      if (confirm("Flush all local storage records?")) {
+        localStorage.clear();
+        location.reload();
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", boot);
   </script>
 </body>
 </html>
