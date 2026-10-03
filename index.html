@@ -4,10 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="theme-color" content="#1e2227" />
+  <meta name="theme-color" content="#1c2024" />
   <title>Nex-Comms // By PriX_J3</title>
   
-  <!-- PeerJS Client CDN -->
+  <!-- PeerJS Client -->
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 
   <style>
@@ -42,7 +42,7 @@
     .view { flex: 1; display: none; flex-direction: column; padding: 14px; overflow-y: auto; }
     .view.active { display: flex; }
 
-    /* Modular Cards */
+    /* Cards */
     .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 12px; }
     .card-title { font-size: 13px; font-weight: 700; margin-bottom: 8px; color: var(--cyan); letter-spacing: 0.5px; }
 
@@ -66,13 +66,13 @@
     .btn-red { background: #b91c1c; border-color: #f87171; color: #fff; }
     .btn-full { width: 100%; }
 
-    /* Items */
+    /* Lists */
     .item {
       background: var(--panel); border: 1px solid var(--border); padding: 12px;
       margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border-radius: 6px; cursor: pointer;
     }
 
-    /* Terminal Message Box */
+    /* Feed Box */
     .feed-box {
       flex: 1; background: #15181b; border: 1px solid var(--border); padding: 12px;
       overflow-y: auto; display: flex; flex-direction: column; gap: 8px; font-size: 13px; border-radius: 6px;
@@ -89,7 +89,6 @@
     }
     .ptt-btn.active-tx { background: #991b1b; border-color: #f87171; color: #fff; }
 
-    /* Footer Branding */
     footer {
       background: var(--panel); padding: 8px; text-align: center; font-size: 11px;
       color: var(--text-dim); border-top: 1px solid var(--border);
@@ -127,7 +126,7 @@
     <div class="card" style="padding: 10px; margin-bottom: 10px;">
       <div style="display: flex; justify-content: space-between; font-size: 12px;">
         <span>NAME: <strong id="hub-name" style="color:var(--green);">--</strong></span>
-        <span>MY KEY: <strong id="hub-key" style="color:var(--cyan);">--</strong></span>
+        <span>MY KEY: <strong id="hub-key" style="color:var(--cyan);">CONNECTING...</strong></span>
       </div>
     </div>
 
@@ -184,7 +183,6 @@
     </div>
   </div>
 
-  <!-- Footer Branding -->
   <footer>
     NEX-COMMS // OPERATIONAL ARCHITECTURE BY PRIX_J3
   </footer>
@@ -192,7 +190,6 @@
   <script>
     const MASTER_KEY = "eternityisgreatbyprixj3";
 
-    // Safe State Load
     let currentUser = null;
     try {
       currentUser = JSON.parse(localStorage.getItem('nex_user'));
@@ -204,7 +201,7 @@
     let peer = null;
     let activeConnection = null;
 
-    // Web Audio Synthesizer
+    // Audio Engine
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playBeep(freq = 1000, duration = 0.12) {
       if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -235,10 +232,10 @@
     }
 
     function generateKey() {
-      const chars = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
+      const chars = "23456789abcdefghjklmnpqrstuvwxyz";
       let res = "";
       for (let i = 0; i < 4; i++) res += chars.charAt(Math.floor(Math.random() * chars.length));
-      return "del-" + res.toLowerCase();
+      return "del-" + res;
     }
 
     function switchView(name) {
@@ -292,27 +289,45 @@
 
       peer.on('open', (id) => {
         document.getElementById('hub-key').innerText = id;
+        document.getElementById('hud-badge').innerText = "CONNECTED";
       });
 
+      // Receiving connection from a friend
       peer.on('connection', (conn) => {
         setupConn(conn);
+      });
+
+      peer.on('error', (err) => {
+        console.error("Peer Error:", err);
       });
     }
 
     function setupConn(conn) {
       activeConnection = conn;
+
       conn.on('open', () => {
         appendLog(`[LINK OPEN] Connected to ${conn.peer}`, 'sys');
       });
 
+      // Data Receive Event + VIBRATION INTEGRATION
       conn.on('data', (data) => {
         if (typeof data === 'object') {
           if (data.type === '3PING') {
             playSquelch();
-            appendLog(`>> 3-PING FROM ${data.sender}`, 'sys');
-            if (data.count === 3) playBeep(1200, 0.2);
+            
+            // Physical Phone Vibration
+            if ('vibrate' in navigator) {
+              navigator.vibrate([150, 80, 150]);
+            }
+            
+            appendLog(`>> 3-PING FROM ${data.sender} (${data.count}/3)`, 'sys');
+            if (data.count === 3) {
+              playBeep(1200, 0.2);
+              if ('vibrate' in navigator) navigator.vibrate(350);
+            }
           } else if (data.type === 'CHAT') {
             playSquelch();
+            if ('vibrate' in navigator) navigator.vibrate(100);
             appendLog(`${data.sender}: ${data.text}`, 'peer');
           } else if (data.type === 'PTT_ON') {
             playSquelch();
@@ -323,6 +338,10 @@
           }
         }
       });
+
+      conn.on('close', () => {
+        appendLog("[LINK CLOSED] Peer left.", 'sys');
+      });
     }
 
     function openComms(targetId, isChannel) {
@@ -331,7 +350,7 @@
       switchView('comms');
 
       if (!isChannel && peer) {
-        appendLog(`Connecting to ${targetId}...`, 'sys');
+        appendLog(`Initiating Link to ${targetId}...`, 'sys');
         const conn = peer.connect(targetId);
         setupConn(conn);
       }
@@ -346,15 +365,29 @@
       feed.scrollTop = feed.scrollHeight;
     }
 
+    // 3-Ping Trigger
     function send3Ping() {
-      if (!activeConnection || !activeConnection.open) return appendLog("[ERROR] Peer link not ready.", 'sys');
+      if (activeSession && activeSession.isChannel) {
+        return appendLog("[INFO] 3-Ping direct friend link ke liye hai, channel ke liye nahi.", 'sys');
+      }
+
+      if (!activeConnection || !activeConnection.open) {
+        return appendLog("[ERROR] Peer link not ready yet. Please wait 2 seconds or reconnect.", 'sys');
+      }
+
       appendLog("Initiating 3-Ping...", 'sys');
       let c = 0;
       const t = setInterval(() => {
         c++;
         playSquelch();
-        activeConnection.send({ type: '3PING', count: c, sender: currentUser.name });
-        appendLog(`>> Ping ${c}/3 delivered`, 'sys');
+        try {
+          activeConnection.send({ type: '3PING', count: c, sender: currentUser.name });
+          appendLog(`>> Ping ${c}/3 delivered`, 'sys');
+        } catch(e) {
+          clearInterval(t);
+          appendLog("[ERROR] Failed to send packet.", 'sys');
+        }
+
         if (c >= 3) {
           clearInterval(t);
           playBeep(1200, 0.2);
